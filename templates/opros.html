@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Опрос</title>
+</head>
+<body>
+  <form method="post" action="/submit/{{ id_opros }}">
+    {% for id_vopros, tekst, tip, variants in voprosy %}
+      <p><strong>{{ tekst }}</strong></p>
+      {% for id_var, text in variants %}
+        {% if tip == 'single' %}
+          <label><input type="radio" name="q_{{ id_vopros }}" value="{{ id_var }}" required> {{ text }}</label><br>
+        {% else %}
+          <label><input type="checkbox" name="q_{{ id_vopros }}" value="{{ id_var }}"> {{ text }}</label><br>
+        {% endif %}
+      {% endfor %}
+      <hr>
+    {% endfor %}
+    <button type="submit">Отправить ответы</button>
+  </form>
+</body>
+</html>
