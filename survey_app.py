@@ -11,7 +11,7 @@ def get_conn():
 @app.route('/')
 def index():
     with get_conn() as conn, conn.cursor() as cur:
-        cur.execute("SELECT id_opros, nazvanie, opisanie FROM opros ORDER BY data DESC;")
+        cur.execute("SELECT id_opros, nazvanie, opisanie FROM opros WHERE dostup = TRUE ORDER BY data DESC;")
         opros_list = cur.fetchall()
     return render_template('index.html', opros_list=opros_list)
 
