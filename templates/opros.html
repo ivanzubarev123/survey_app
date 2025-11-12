@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Опрос</title>
+  <meta charset="UTF-8">
+  <title>Опрос</title>
 </head>
 <body>
-    <form method="post" action="/opros/{{ id_opros }}">
-    
-        {% for q in questions %} 
-            <p><strong>{{ q.tekst_vopros }}</strong></p>
-      
-            {% for v in q.variants %} 
-                {% if q.tip == 'single' %}
-          <label><input type="radio" name="{{ q.id_vopros }}" value="{{ v.id_variant }}" required> {{ v.tekst_vopros }}</label><br>
-        {% else %}
-          <label><input type="checkbox" name="{{ q.id_vopros }}" value="{{ v.id_variant }}"> {{ v.tekst_vopros }}</label><br>
-        {% endif %}
-      {% endfor %}
-      <hr>
-    {% endfor %}
-    <button type="submit">Отправить ответы</button>
-  </form>
+  <form method="post" action="/opros/{{ id_opros }}">
+    
+    {% for q in questions %}
+      <p><strong>{{ q.tekst_vopros }}</strong></p>
+      
+      {% for v in q.variants %}
+        {% if q.tip_voprosa == 'single' %}
+          <label><input type="radio" name="{{ q.id_vopros }}" value="{{ v.id_variant }}" required> {{ v.tekst_otveta }}</label><br>
+        {% else %}
+          <label><input type="checkbox" name="{{ q.id_vopros }}" value="{{ v.id_variant }}"> {{ v.tekst_otveta }}</label><br>
+        {% endif %}
+      {% endfor %}
+      <hr>
+    {% endfor %}
+    <button type="submit">Отправить ответы</button>
+  </form>
 </body>
 </html>
