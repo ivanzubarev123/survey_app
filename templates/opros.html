@@ -8,13 +8,13 @@
     <form method="post" action="/opros/{{ id_opros }}">
     
         {% for q in questions %} 
-            <p><strong>{{ q.tekst }}</strong></p>
+            <p><strong>{{ q.tekst_vopros }}</strong></p>
       
             {% for v in q.variants %} 
                 {% if q.tip == 'single' %}
-          <label><input type="radio" name="{{ q.id_vopros }}" value="{{ v.id_variant }}" required> {{ v.tekst }}</label><br>
+          <label><input type="radio" name="{{ q.id_vopros }}" value="{{ v.id_variant }}" required> {{ v.tekst_vopros }}</label><br>
         {% else %}
-          <label><input type="checkbox" name="{{ q.id_vopros }}" value="{{ v.id_variant }}"> {{ v.tekst }}</label><br>
+          <label><input type="checkbox" name="{{ q.id_vopros }}" value="{{ v.id_variant }}"> {{ v.tekst_vopros }}</label><br>
         {% endif %}
       {% endfor %}
       <hr>
