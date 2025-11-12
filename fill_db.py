@@ -133,24 +133,28 @@ surveys = {
     ],
 }
 
-# --- Очистка и загрузка ---
 def clear_database(conn, cur):
     print("🧹 Очищаю старые данные...")
-    cur.execute("TRUNCATE variant_otveta RESTART IDENTITY CASCADE;")
-    cur.execute("TRUNCATE vopros RESTART IDENTITY CASCADE;")
-    cur.execute("TRUNCATE opros RESTART IDENTITY CASCADE;")
+    # Правильный порядок удаления из-за foreign keys
+    cur.execute("TRUNCATE TABLE otvet_polzovatelya RESTART IDENTITY CASCADE;")
+    cur.execute("TRUNCATE TABLE sessiya RESTART IDENTITY CASCADE;")
+    cur.execute("TRUNCATE TABLE variant_otveta RESTART IDENTITY CASCADE;")
+    cur.execute("TRUNCATE TABLE vopros RESTART IDENTITY CASCADE;")
+    cur.execute("TRUNCATE TABLE opros RESTART IDENTITY CASCADE;")
     conn.commit()
     print("База очищена ✅")
 
 def fill_db_from_dict(data):
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
-    ##clear_database(conn, cur)
+    
+    #clear_database(conn, cur)
 
     print("🚀 Заполняю базу новыми опросами...")
     for topic, questions in data.items():
+        # Добавляем недостающие поля или используем DEFAULT значения
         cur.execute(
-            "INSERT INTO opros (nazvanie, opisanie, data) VALUES (%s, %s, CURRENT_DATE) RETURNING id_opros;",
+            "INSERT INTO opros (nazvanie, opisanie, data, vremya_nachala, vremya_konca, dostup) VALUES (%s, %s, CURRENT_DATE, NULL, NULL, TRUE) RETURNING id_opros;",
             (topic, f"Опрос на тему: {topic}")
         )
         id_opros = cur.fetchone()[0]
