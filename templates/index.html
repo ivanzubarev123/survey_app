@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Список опросов</title>
+  <meta charset="UTF-8">
+  <title>Список опросов</title>
 </head>
 <body>
-  <h1>Доступные опросы</h1>
-  <ul>
-    {% for id, name, desc in opros_list %}
-      <li>
-        <a href="/opros/{{ id }}">{{ name }}</a><br>
-        <small>{{ desc }}</small>
-      </li>
-    {% endfor %}
-  </ul>
+  <h1>Доступные опросы</h1>
+  <ul>
+    {% for survey in surveys %}        <li>
+                <a href="/opros/{{ survey.id_opros }}">{{ survey.nazvanie }}</a><br>
+        <small>{{ survey.opisanie }}</small>
+      </li>
+    {% endfor %}
+  </ul>
 </body>
 </html>
