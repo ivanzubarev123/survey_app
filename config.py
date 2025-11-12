@@ -1,7 +1,7 @@
 DB_CONFIG = {
-    'dbname': 'survey',
-    'user': 'postgres',
-    'password': 'Ivanzubarev1',
-    'host': 'localhost',
-    'port': '5432'
+    "host": "dpg-d3trfk49c44c73e8ptpg-a",
+    "port": 5432,
+    "dbname": "survey",
+    "user": "survey_3ot3_user",
+    "password": "7MQWoZO4wEfpX6yAqa6SY1BnL1jbfnmT"
 }
