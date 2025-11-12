@@ -105,7 +105,7 @@ def opros(id_opros):
     
     # 2. Получаем вопросы для этого опроса
     questions_data = fetch_data(
-        "SELECT id_vopros, tekst, tip FROM vopros WHERE id_opros = %s ORDER BY poryadok;", 
+        "SELECT id_vopros, tekst_vopros, tip_voprosa FROM vopros WHERE id_opros = %s ORDER BY poryadok;", 
         (id_opros,)
     )
 
@@ -114,7 +114,7 @@ def opros(id_opros):
     # 3. Для каждого вопроса получаем его варианты ответа
     for q in questions_data:
         variants = fetch_data(
-            "SELECT id_variant, tekst FROM variant_otveta WHERE id_vopros = %s ORDER BY poryadok;",
+            "SELECT id_variant, tekst_vopros FROM variant_otveta WHERE id_vopros = %s ORDER BY poryadok;",
             (q["id_vopros"],)
         )
         # Добавляем варианты в словарь вопроса
