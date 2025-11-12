@@ -113,8 +113,9 @@ def opros(id_opros):
     
     # 3. Для каждого вопроса получаем его варианты ответа
     for q in questions_data:
+        # ИСПРАВЛЕНИЕ: заменили tekst_vopros на tekst_otveta
         variants = fetch_data(
-            "SELECT id_variant, tekst_vopros FROM variant_otveta WHERE id_vopros = %s ORDER BY poryadok;",
+            "SELECT id_variant, tekst_otveta FROM variant_otveta WHERE id_vopros = %s;",  # ← ВАЖНОЕ ИСПРАВЛЕНИЕ
             (q["id_vopros"],)
         )
         # Добавляем варианты в словарь вопроса
