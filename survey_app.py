@@ -4,19 +4,16 @@ from flask import Flask, render_template, request, redirect, url_for, abort
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-# Инициализация Flask приложения
 app = Flask(__name__)
 
-# Получаем URL базы из переменных окружения Render
 DB_URL = os.environ.get("DATABASE_URL")
 
 
-# --- УТИЛИТЫ БАЗЫ ДАННЫХ ---
+# ---------- БАЗА ДАННЫХ ----------
 
 def get_conn():
-    """Создает соединение с базой данных, используя RealDictCursor."""
     if not DB_URL:
-        print("FATAL: DATABASE_URL environment variable is not set.", file=sys.stderr)
+        print("FATAL: DATABASE_URL is not set.", file=sys.stderr)
         sys.exit(1)
 
     conn_str = DB_URL
@@ -27,7 +24,6 @@ def get_conn():
 
 
 def fetch_data(query, params=None):
-    """Обобщенная функция для получения данных."""
     try:
         with get_conn() as conn:
             with conn.cursor() as cur:
@@ -38,7 +34,7 @@ def fetch_data(query, params=None):
         return None
 
 
-# --- СТАРТ ОПРОСА (выбор пола и возраста) ---
+# ---------- СТАРТ (пол + возраст) ----------
 
 @app.route("/start/<int:id_opros>", methods=["GET", "POST"])
 def start(id_opros):
@@ -49,6 +45,7 @@ def start(id_opros):
         try:
             with get_conn() as conn:
                 with conn.cursor() as cur:
+
                     cur.execute(
                         """
                         INSERT INTO sessiya (id_opros, pol, vozrast)
@@ -63,17 +60,19 @@ def start(id_opros):
             return redirect(url_for("opros", id_opros=id_opros, id_sessii=id_sessii))
 
         except Exception as e:
-            print("ERROR CREATING SESSION:", e)
+            print("ERROR creating session:", e)
             return "<h1>Ошибка создания сессии.</h1>", 500
 
     return render_template("start.html", id_opros=id_opros)
 
 
-# --- ГЛАВНАЯ ---
+# ---------- ГЛАВНАЯ ----------
 
 @app.route("/")
 def index():
-    surveys = fetch_data("SELECT id_opros, nazvanie, opisanie FROM opros WHERE dostup = TRUE;")
+    surveys = fetch_data(
+        "SELECT id_opros, nazvanie, opisanie FROM opros WHERE dostup = TRUE;"
+    )
 
     if surveys is None:
         return "<h1>Ошибка подключения к базе данных.</h1>", 500
@@ -81,17 +80,18 @@ def index():
     return render_template("index.html", surveys=surveys)
 
 
-# --- ОПРОС ---
+# ---------- ОПРОС ----------
 
 @app.route("/opros/<int:id_opros>/<int:id_sessii>", methods=["GET", "POST"])
 def opros(id_opros, id_sessii):
 
-    # --- POST (сохраняем ответы) ---
+    # ---------- POST: сохраняем ответы ----------
     if request.method == "POST":
         try:
             with get_conn() as conn:
                 with conn.cursor() as cur:
 
+                    # сохраняем ответы
                     for question_id_str in request.form:
                         if not question_id_str.isdigit():
                             continue
@@ -109,6 +109,12 @@ def opros(id_opros, id_sessii):
                                     (id_sessii, question_id, int(variant_id_str)),
                                 )
 
+                    # ---------- ДОБАВЛЕНО: фиксация времени окончания ----------
+                    cur.execute(
+                        "UPDATE sessiya SET vremya_konca = NOW() WHERE id_sessii = %s;",
+                        (id_sessii,),
+                    )
+
                 conn.commit()
 
             return redirect(url_for("thanks"))
@@ -117,8 +123,7 @@ def opros(id_opros, id_sessii):
             print(f"CRITICAL DATABASE ERROR during submission: {e}", file=sys.stderr)
             return "<h1>Ошибка: Не удалось сохранить ответы.</h1>", 500
 
-    # --- GET (показываем опрос) ---
-
+    # ---------- GET: отображаем вопросы ----------
     survey_data = fetch_data(
         "SELECT nazvanie, opisanie FROM opros WHERE id_opros = %s AND dostup = TRUE;",
         (id_opros,),
@@ -156,14 +161,15 @@ def opros(id_opros, id_sessii):
     )
 
 
-# --- СТРАНИЦА СПАСИБО ---
+# ---------- СПАСИБО ----------
 
 @app.route("/thanks")
 def thanks():
     return render_template("thanks.html")
 
 
-# --- ЗАПУСК СЕРВЕРА (локально) ---
+# ---------- ЗАПУСК ----------
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
