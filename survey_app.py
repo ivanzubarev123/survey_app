@@ -9,11 +9,9 @@ app = Flask(__name__)
 DB_URL = os.environ.get("DATABASE_URL")
 
 
-# ---------- БАЗА ДАННЫХ ----------
-
 def get_conn():
     if not DB_URL:
-        print("FATAL: DATABASE_URL is not set.", file=sys.stderr)
+        print("DATABASE_URL is not set.", file=sys.stderr)
         sys.exit(1)
 
     conn_str = DB_URL
@@ -29,12 +27,9 @@ def fetch_data(query, params=None):
             with conn.cursor() as cur:
                 cur.execute(query, params)
                 return cur.fetchall()
-    except psycopg2.Error as e:
-        print(f"DATABASE ERROR during fetch: {e}", file=sys.stderr)
+    except:
         return None
 
-
-# ---------- СТАРТ (пол + возраст) ----------
 
 @app.route("/start/<int:id_opros>", methods=["GET", "POST"])
 def start(id_opros):
@@ -45,7 +40,6 @@ def start(id_opros):
         try:
             with get_conn() as conn:
                 with conn.cursor() as cur:
-
                     cur.execute(
                         """
                         INSERT INTO sessiya (id_opros, pol, vozrast)
@@ -59,14 +53,11 @@ def start(id_opros):
 
             return redirect(url_for("opros", id_opros=id_opros, id_sessii=id_sessii))
 
-        except Exception as e:
-            print("ERROR creating session:", e)
+        except:
             return "<h1>Ошибка создания сессии.</h1>", 500
 
     return render_template("start.html", id_opros=id_opros)
 
-
-# ---------- ГЛАВНАЯ ----------
 
 @app.route("/")
 def index():
@@ -80,18 +71,14 @@ def index():
     return render_template("index.html", surveys=surveys)
 
 
-# ---------- ОПРОС ----------
-
 @app.route("/opros/<int:id_opros>/<int:id_sessii>", methods=["GET", "POST"])
 def opros(id_opros, id_sessii):
 
-    # ---------- POST: сохраняем ответы ----------
     if request.method == "POST":
         try:
             with get_conn() as conn:
                 with conn.cursor() as cur:
 
-                    # сохраняем ответы
                     for question_id_str in request.form:
                         if not question_id_str.isdigit():
                             continue
@@ -100,16 +87,14 @@ def opros(id_opros, id_sessii):
                         variant_ids = request.form.getlist(question_id_str)
 
                         for variant_id_str in variant_ids:
-                            if variant_id_str:
-                                cur.execute(
-                                    """
-                                    INSERT INTO otvet_polzovatelya (id_sessii, id_vopros, id_variant)
-                                    VALUES (%s, %s, %s);
-                                    """,
-                                    (id_sessii, question_id, int(variant_id_str)),
-                                )
+                            cur.execute(
+                                """
+                                INSERT INTO otvet_polzovatelya (id_sessii, id_vopros, id_variant)
+                                VALUES (%s, %s, %s);
+                                """,
+                                (id_sessii, question_id, int(variant_id_str)),
+                            )
 
-                    # ---------- ДОБАВЛЕНО: фиксация времени окончания ----------
                     cur.execute(
                         "UPDATE sessiya SET vremya_konca = NOW() WHERE id_sessii = %s;",
                         (id_sessii,),
@@ -119,11 +104,9 @@ def opros(id_opros, id_sessii):
 
             return redirect(url_for("thanks"))
 
-        except Exception as e:
-            print(f"CRITICAL DATABASE ERROR during submission: {e}", file=sys.stderr)
+        except:
             return "<h1>Ошибка: Не удалось сохранить ответы.</h1>", 500
 
-    # ---------- GET: отображаем вопросы ----------
     survey_data = fetch_data(
         "SELECT nazvanie, opisanie FROM opros WHERE id_opros = %s AND dostup = TRUE;",
         (id_opros,),
@@ -143,7 +126,6 @@ def opros(id_opros, id_sessii):
     )
 
     questions = []
-
     for q in questions_data:
         variants = fetch_data(
             "SELECT id_variant, tekst_otveta FROM variant_otveta WHERE id_vopros = %s;",
@@ -161,14 +143,10 @@ def opros(id_opros, id_sessii):
     )
 
 
-# ---------- СПАСИБО ----------
-
 @app.route("/thanks")
 def thanks():
     return render_template("thanks.html")
 
-
-# ---------- ЗАПУСК ----------
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
