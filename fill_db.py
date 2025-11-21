@@ -1,7 +1,6 @@
 import psycopg2
 from config import DB_CONFIG
 
-# --- Темы и вопросы ---
 surveys = {
     "Музыка": [
         ("Какой жанр музыки вы чаще всего слушаете?", ["Рок", "Поп", "Джаз", "Классика"], "single"),
@@ -135,7 +134,6 @@ surveys = {
 
 def clear_database(conn, cur):
     print("🧹 Очищаю старые данные...")
-    # Правильный порядок удаления из-за foreign keys
     cur.execute("TRUNCATE TABLE otvet_polzovatelya RESTART IDENTITY CASCADE;")
     cur.execute("TRUNCATE TABLE sessiya RESTART IDENTITY CASCADE;")
     cur.execute("TRUNCATE TABLE variant_otveta RESTART IDENTITY CASCADE;")
@@ -148,11 +146,10 @@ def fill_db_from_dict(data):
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
     
-    clear_database(conn, cur)
+    #clear_database(conn, cur)
 
     print("🚀 Заполняю базу новыми опросами...")
     for topic, questions in data.items():
-        # Добавляем недостающие поля или используем DEFAULT значения
         cur.execute(
             "INSERT INTO opros (nazvanie, opisanie, data, dostup) VALUES (%s, %s, CURRENT_DATE, TRUE) RETURNING id_opros;",
             (topic, f"Опрос на тему: {topic}")
