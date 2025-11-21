@@ -154,7 +154,7 @@ def fill_db_from_dict(data):
     for topic, questions in data.items():
         # Добавляем недостающие поля или используем DEFAULT значения
         cur.execute(
-            "INSERT INTO opros (nazvanie, opisanie, data, vremya_nachala, vremya_konca, dostup) VALUES (%s, %s, CURRENT_DATE, NULL, NULL, TRUE) RETURNING id_opros;",
+            "INSERT INTO opros (nazvanie, opisanie, data, dostup) VALUES (%s, %s, CURRENT_DATE, TRUE) RETURNING id_opros;",
             (topic, f"Опрос на тему: {topic}")
         )
         id_opros = cur.fetchone()[0]
