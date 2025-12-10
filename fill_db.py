@@ -146,7 +146,7 @@ def fill_db_from_dict(data):
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
     
-    clear_database(conn, cur)
+    #clear_database(conn, cur)
 
     print("🚀 Заполняю базу новыми опросами...")
     for topic, questions in data.items():
