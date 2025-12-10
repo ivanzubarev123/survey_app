@@ -9,16 +9,25 @@ app = Flask(__name__)
 DB_URL = os.environ.get("DATABASE_URL")
 
 
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from config import DB_CONFIG
+
 def get_conn():
-    if not DB_URL:
-        print("DATABASE_URL is not set.", file=sys.stderr)
-        sys.exit(1)
-
-    conn_str = DB_URL
-    if "sslmode" not in DB_URL:
-        conn_str += "?sslmode=require"
-
-    return psycopg2.connect(conn_str, cursor_factory=RealDictCursor)
+    try:
+        conn = psycopg2.connect(
+            host=DB_CONFIG["host"],
+            port=DB_CONFIG["port"],
+            dbname=DB_CONFIG["dbname"],
+            user=DB_CONFIG["user"],
+            password=DB_CONFIG["password"],
+            sslmode="require",  # важно для Render
+            cursor_factory=RealDictCursor
+        )
+        return conn
+    except Exception as e:
+        print("Ошибка подключения к базе:", e)
+        raise
 
 
 def fetch_data(query, params=None):
