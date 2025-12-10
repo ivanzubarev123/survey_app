@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Общая статистика</title>
+</head>
+<body>
+  <h1>Общая статистика по всем опросам</h1>
+  
+  <p>Всего респондентов: {{ total_respondents }}</p>
+  
+  <table border="1">
+    <tr>
+      <th>Пол</th>
+      <th>Возрастная группа</th>
+      <th>Количество</th>
+      <th>Процент</th>
+    </tr>
+    {% for row in stats %}
+    <tr>
+      <td>{{ row.pol }}</td>
+      <td>{{ row.vozrast_gruppa }}</td>
+      <td>{{ row.count }}</td>
+      <td>
+        {% if total_respondents > 0 %}
+          {{ "%.1f"|format(row.count/total_respondents*100) }}%
+        {% else %}
+          0%
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  
+  <br>
+  <a href="{{ url_for('index') }}">Назад к списку опросов</a>
+</body>
+</html>
