@@ -71,23 +71,40 @@ def index():
 
 @app.route('/start/<int:id_opros>', methods=['GET', 'POST'])
 def start(id_opros):
-    print("id_opros:", id_opros)  # должно печатать 4
+    print("id_opros:", id_opros)
 
-    if request.method == 'POST':
-        pol = request.form['pol']
-        vozrast = request.form['vozrast']
+    if request.method == "POST":
+        pol = request.form.get("pol")
+        vozrast = request.form.get("vozrast")
 
-        cur.execute("""
-            INSERT INTO sessiya (id_opros, data_sessii, pol, vozrast)
-            VALUES (%s, NOW(), %s, %s)
-            RETURNING id_sessii;
-        """, (id_opros, pol, vozrast))
+        if pol not in ("М", "Ж") or not vozrast or not vozrast.isdigit():
+            return "<h1>Некорректные данные.</h1>", 400
 
-        id_sessii = cur.fetchone()[0]
-        conn.commit()
+        vozrast = int(vozrast)
 
-        return redirect(url_for('vopros', id_sessii=id_sessii))
-    return render_template('start.html', id_opros=id_opros)
+        try:
+            with get_conn() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """
+                        INSERT INTO sessiya (id_opros, data_sessii, pol, vozrast)
+                        VALUES (%s, NOW(), %s, %s)
+                        RETURNING id_sessii;
+                        """,
+                        (id_opros, pol, vozrast)
+                    )
+
+                    id_sessii = cur.fetchone()[0]
+
+                conn.commit()
+
+            return redirect(url_for("opros", id_opros=id_opros, id_sessii=id_sessii))
+
+        except Exception as e:
+            print("ERROR:", e, file=sys.stderr)
+            return "<h1>Ошибка создания сессии.</h1>", 500
+
+    return render_template("start.html", id_opros=id_opros)
 
 
 @app.route("/opros/<int:id_opros>/<int:id_sessii>", methods=["GET", "POST"])
