@@ -1,7 +1,7 @@
 DB_CONFIG = {
-    "host": "dpg-d3trfk49c44c73e8ptpg-a.oregon-postgres.render.com",
+    "host": "dpg-d4sqjp2li9vc73flbmc0-a.oregon-postgres.render.com",
     "port": 5432,
-    "dbname": "survey_3ot3",
+    "dbname": "survey_3ot3_oop0",
     "user": "survey_3ot3_user",
-    "password": "7MQWoZO4wEfpX6yAqa6SY1BnL1jbfnmT"
+    "password": "2y4nuu7TgOFmluFCnHnrG6LlhGyna1dt"
 }
