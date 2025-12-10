@@ -91,7 +91,7 @@ def start(id_opros):
                         """,
                         (id_opros, pol, vozrast),
                     )
-                    id_sessii = cur.fetchone()["id_sessii"]
+                    id_sessii = cur.fetchone()[0]  # <-- фикс
                     conn.commit()
 
             return redirect(url_for("opros", id_opros=id_opros, id_sessii=id_sessii))
