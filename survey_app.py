@@ -93,15 +93,21 @@ def start(id_opros):
                         """,
                         (id_opros, pol, vozrast)
                     )
-
-                    id_sessii = cur.fetchone()[0]
+                    
+                    # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+                    # Было: id_sessii = cur.fetchone()[0]
+                    # Стало: обращаемся по ключу 'id_sessii'
+                    result = cur.fetchone()
+                    id_sessii = result['id_sessii'] 
+                    # -------------------------
 
                 conn.commit()
 
             return redirect(url_for("opros", id_opros=id_opros, id_sessii=id_sessii))
 
         except Exception as e:
-            print("ERROR:", e, file=sys.stderr)
+            # Для лучшей отладки печатайте тип ошибки тоже
+            print(f"ERROR: {type(e).__name__}: {e}", file=sys.stderr)
             return "<h1>Ошибка создания сессии.</h1>", 500
 
     return render_template("start.html", id_opros=id_opros)
