@@ -68,6 +68,46 @@ def index():
 
     return render_template("index.html", surveys=surveys)
 
+@app.route("/general_stats")
+def general_stats():
+    try:
+        stats_data = fetch_data(
+            """
+            SELECT 
+                pol,
+                CASE
+                    WHEN vozrast < 18 THEN '<18'
+                    WHEN vozrast BETWEEN 18 AND 25 THEN '18-25'
+                    WHEN vozrast BETWEEN 26 AND 35 THEN '26-35'
+                    WHEN vozrast BETWEEN 36 AND 50 THEN '36-50'
+                    ELSE '50+'
+                END AS vozrast_gruppa,
+                COUNT(*) as count
+            FROM sessiya
+            GROUP BY pol, 
+                CASE
+                    WHEN vozrast < 18 THEN '<18'
+                    WHEN vozrast BETWEEN 18 AND 25 THEN '18-25'
+                    WHEN vozrast BETWEEN 26 AND 35 THEN '26-35'
+                    WHEN vozrast BETWEEN 36 AND 50 THEN '36-50'
+                    ELSE '50+'
+                END
+            ORDER BY pol, vozrast_gruppa;
+            """
+        )
+        
+        total_respondents = fetch_data("SELECT COUNT(*) as total FROM sessiya")[0]['total']
+        
+        return render_template(
+            "general_stats.html", 
+            stats=stats_data,
+            total_respondents=total_respondents
+        )
+        
+    except Exception as e:
+        print("Ошибка в функции general_stats:", e, file=sys.stderr)
+        return "<h1>Ошибка при получении статистики</h1>", 500
+
 
 @app.route('/start/<int:id_opros>', methods=['GET', 'POST'])
 def start(id_opros):
