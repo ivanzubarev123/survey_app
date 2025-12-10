@@ -6,7 +6,14 @@
 </head>
 <body>
   <h1>Доступные опросы</h1>
-
+  
+  <div>
+    <a href="{{ url_for('general_stats') }}">Общая статистика</a> | 
+    <a href="https://t.me/ваш_телеграм" target="_blank">Telegram автора</a>
+  </div>
+  
+  <hr>
+  
   <form method="get">
     <label>Название:
       <input type="text" name="nazvanie" value="{{ request.args.get('nazvanie', '')|e }}">
@@ -20,6 +27,8 @@
     </label>
     <button type="submit">Фильтровать</button>
   </form>
+  
+  <hr>
 
   <ul>
     {% for survey in surveys %}
@@ -28,10 +37,9 @@
           {{ survey.nazvanie|e }}
         </a><br>
         <small>{{ survey.opisanie|e }}</small><br>
-        <a href="{{ url_for('stats', id_opros=survey.id_opros) }}">Статистика</a>
+        <a href="{{ url_for('stats', id_opros=survey.id_opros) }}">Статистика этого опроса</a>
       </li>
     {% endfor %}
   </ul>
 </body>
 </html>
-
