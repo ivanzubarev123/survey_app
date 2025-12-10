@@ -2,31 +2,30 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>{{ survey['nazvanie'] }}</title>
+  <title>Опрос</title>
 </head>
 <body>
 
-  <h1>{{ survey['nazvanie'] }}</h1>
-  <p>{{ survey['opisanie'] }}</p>
+  <h1>{{ survey.nazvanie|e }}</h1>
+  <p>{{ survey.opisanie|e }}</p>
 
   <form method="post" action="{{ url_for('opros', id_opros=id_opros, id_sessii=id_sessii) }}">
     {% for q in questions %}
-      <p><strong>{{ q['tekst_vopros'] }}</strong></p>
+      <p><strong>{{ q.tekst_vopros|e }}</strong></p>
 
-      {% for v in q['variants'] %}
-        {% if q['tip_voprosa'] == 'single' %}
+      {% for v in q.variants %}
+        {% if q.tip_voprosa == 'single' %}
           <label>
             <input type="radio" name="{{ q.id_vopros }}" value="{{ v.id_variant }}" required>
-            {{ v['tekst_otveta'] }}
+            {{ v.tekst_otveta|e }}
           </label><br>
         {% else %}
           <label>
             <input type="checkbox" name="{{ q.id_vopros }}" value="{{ v.id_variant }}">
-            {{ v['tekst_otveta'] }}
+            {{ v.tekst_otveta|e }}
           </label><br>
         {% endif %}
       {% endfor %}
-
       <hr>
     {% endfor %}
 
