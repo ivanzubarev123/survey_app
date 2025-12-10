@@ -9,7 +9,7 @@
   <ul>
     {% for survey in surveys %}
       <li>
-        <a href="{{ url_for('start', id_opros=survey['id_opros']) }}">
+        <a href="{{ url_for('start', id_opros=survey.id_opros) }}">
           {{ survey['nazvanie'] }}
         </a><br>
         <small>{{ survey['opisanie'] }}</small>
