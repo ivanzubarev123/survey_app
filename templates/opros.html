@@ -16,12 +16,12 @@
       {% for v in q['variants'] %}
         {% if q['tip_voprosa'] == 'single' %}
           <label>
-            <input type="radio" name="{{ q['id_vopros'] }}" value="{{ v['id_variant'] }}" required>
+            <input type="radio" name="{{ q.id_vopros }}" value="{{ v.id_variant }}" required>
             {{ v['tekst_otveta'] }}
           </label><br>
         {% else %}
           <label>
-            <input type="checkbox" name="{{ q['id_vopros'] }}" value="{{ v['id_variant'] }}">
+            <input type="checkbox" name="{{ q.id_vopros }}" value="{{ v.id_variant }}">
             {{ v['tekst_otveta'] }}
           </label><br>
         {% endif %}
