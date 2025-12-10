@@ -6,15 +6,32 @@
 </head>
 <body>
   <h1>Доступные опросы</h1>
+
+  <form method="get">
+    <label>Название:
+      <input type="text" name="nazvanie" value="{{ request.args.get('nazvanie', '')|e }}">
+    </label>
+    <label>Доступ:
+      <select name="dostup">
+        <option value="">Все</option>
+        <option value="true" {% if request.args.get('dostup')=='true' %}selected{% endif %}>Да</option>
+        <option value="false" {% if request.args.get('dostup')=='false' %}selected{% endif %}>Нет</option>
+      </select>
+    </label>
+    <button type="submit">Фильтровать</button>
+  </form>
+
   <ul>
     {% for survey in surveys %}
       <li>
         <a href="{{ url_for('start', id_opros=survey.id_opros) }}">
-          {{ survey['nazvanie'] }}
+          {{ survey.nazvanie|e }}
         </a><br>
-        <small>{{ survey['opisanie'] }}</small>
+        <small>{{ survey.opisanie|e }}</small><br>
+        <a href="{{ url_for('stats', id_opros=survey.id_opros) }}">Статистика</a>
       </li>
     {% endfor %}
   </ul>
 </body>
 </html>
+
