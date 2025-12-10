@@ -75,7 +75,7 @@ def start(id_opros):
         pol = sanitize_string(request.form.get("pol"))
         vozrast = request.form.get("vozrast")
 
-        if pol not in ("M", "F") or not vozrast or not vozrast.isdigit():
+        if pol not in ("Мужской", "Женский") or not vozrast or not vozrast.isdigit():
             return "<h1>Некорректные данные.</h1>", 400
 
         vozrast = int(vozrast)
