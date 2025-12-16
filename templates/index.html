@@ -7,9 +7,9 @@
 <body>
   <h1>Доступные опросы</h1>
   
-  <!-- Добавляем ссылку на общую статистику -->
   <div>
-    <a href="{{ url_for('general_stats') }}">Общая статистика по всем опросам</a>
+    <a href="{{ url_for('general_stats') }}">Общая статистика</a> | 
+    <a href="https://t.me/ваш_телеграм" target="_blank">Telegram автора</a>
   </div>
   
   <hr>
@@ -37,8 +37,7 @@
           {{ survey.nazvanie|e }}
         </a><br>
         <small>{{ survey.opisanie|e }}</small><br>
-        <!-- Убираем ссылку на статистику конкретного опроса, если хотите только общую -->
-        <!-- <a href="{{ url_for('stats', id_opros=survey.id_opros) }}">Статистика этого опроса</a> -->
+        <a href="{{ url_for('stats', id_opros=survey.id_opros) }}">Статистика этого опроса</a>
       </li>
     {% endfor %}
   </ul>
