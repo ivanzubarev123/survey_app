@@ -8,27 +8,35 @@ from psycopg2.extras import RealDictCursor
 app = Flask(__name__)
 DB_URL = os.environ.get("DATABASE_URL")
 
-
-import psycopg2
-from psycopg2.extras import RealDictCursor
-from config import DB_CONFIG
+# Импортируем DB_CONFIG только если нет DATABASE_URL
+if not DB_URL:
+    try:
+        from config import DB_CONFIG
+    except ImportError:
+        DB_CONFIG = {}
 
 def get_conn():
     try:
-        conn = psycopg2.connect(
-            host=DB_CONFIG["host"],
-            port=DB_CONFIG["port"],
-            dbname=DB_CONFIG["dbname"],
-            user=DB_CONFIG["user"],
-            password=DB_CONFIG["password"],
-            sslmode="require",  # важно для Render
-            cursor_factory=RealDictCursor
-        )
+        if DB_URL:
+            # Используем DATABASE_URL из переменных окружения (для Render)
+            conn = psycopg2.connect(DB_URL, cursor_factory=RealDictCursor)
+        elif DB_CONFIG:
+            # Используем конфигурацию из файла config.py
+            conn = psycopg2.connect(
+                host=DB_CONFIG.get("host"),
+                port=DB_CONFIG.get("port"),
+                dbname=DB_CONFIG.get("dbname"),
+                user=DB_CONFIG.get("user"),
+                password=DB_CONFIG.get("password"),
+                sslmode="require",
+                cursor_factory=RealDictCursor
+            )
+        else:
+            raise Exception("Не заданы параметры подключения к БД")
         return conn
     except Exception as e:
         print("Ошибка подключения к базе:", e)
         raise
-
 
 def fetch_data(query, params=None):
     try:
@@ -40,12 +48,10 @@ def fetch_data(query, params=None):
         print(e, file=sys.stderr)
         return None
 
-
 def sanitize_string(s):
     if s:
         return Markup.escape(s.strip())
     return None
-
 
 @app.route("/")
 def index():
@@ -96,23 +102,24 @@ def general_stats():
             """
         )
         
-        total_respondents = fetch_data("SELECT COUNT(*) as total FROM sessiya")[0]['total']
+        total_respondents = fetch_data("SELECT COUNT(*) as total FROM sessiya")
+        if total_respondents:
+            total = total_respondents[0]['total']
+        else:
+            total = 0
         
         return render_template(
             "general_stats.html", 
-            stats=stats_data,
-            total_respondents=total_respondents
+            stats=stats_data or [],
+            total_respondents=total
         )
         
     except Exception as e:
         print("Ошибка в функции general_stats:", e, file=sys.stderr)
         return "<h1>Ошибка при получении статистики</h1>", 500
 
-
 @app.route('/start/<int:id_opros>', methods=['GET', 'POST'])
 def start(id_opros):
-    print("id_opros:", id_opros)
-
     if request.method == "POST":
         pol = request.form.get("pol")
         vozrast = request.form.get("vozrast")
@@ -134,24 +141,18 @@ def start(id_opros):
                         (id_opros, pol, vozrast)
                     )
                     
-                    # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-                    # Было: id_sessii = cur.fetchone()[0]
-                    # Стало: обращаемся по ключу 'id_sessii'
                     result = cur.fetchone()
-                    id_sessii = result['id_sessii'] 
-                    # -------------------------
+                    id_sessii = result['id_sessii']
 
                 conn.commit()
 
             return redirect(url_for("opros", id_opros=id_opros, id_sessii=id_sessii))
 
         except Exception as e:
-            # Для лучшей отладки печатайте тип ошибки тоже
             print(f"ERROR: {type(e).__name__}: {e}", file=sys.stderr)
             return "<h1>Ошибка создания сессии.</h1>", 500
 
     return render_template("start.html", id_opros=id_opros)
-
 
 @app.route("/opros/<int:id_opros>/<int:id_sessii>", methods=["GET", "POST"])
 def opros(id_opros, id_sessii):
@@ -219,35 +220,9 @@ def opros(id_opros, id_sessii):
         questions=questions,
     )
 
-
 @app.route("/thanks")
 def thanks():
     return render_template("thanks.html")
-
-
-@app.route("/stats/<int:id_opros>")
-def stats(id_opros):
-    stats_data = fetch_data(
-        """
-        SELECT pol,
-               CASE
-                   WHEN vozrast < 18 THEN '<18'
-                   WHEN vozrast BETWEEN 18 AND 25 THEN '18-25'
-                   WHEN vozrast BETWEEN 26 AND 35 THEN '26-35'
-                   WHEN vozrast BETWEEN 36 AND 50 THEN '36-50'
-                   ELSE '50+'
-               END AS vozrast_gruppa,
-               COUNT(*) as count
-        FROM sessiya
-        WHERE id_opros = %s
-        GROUP BY pol, vozrast_gruppa
-        ORDER BY pol, vozrast_gruppa;
-        """,
-        (id_opros,),
-    )
-
-    return render_template("stats.html", stats=stats_data, id_opros=id_opros)
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
