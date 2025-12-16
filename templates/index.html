@@ -37,7 +37,6 @@
           {{ survey.nazvanie|e }}
         </a><br>
         <small>{{ survey.opisanie|e }}</small><br>
-        <a href="{{ url_for('stats', id_opros=survey.id_opros) }}">Статистика этого опроса</a>
       </li>
     {% endfor %}
   </ul>
