@@ -15,15 +15,20 @@ from config import DB_CONFIG
 
 def get_conn():
     try:
-        conn = psycopg2.connect(
-            host=DB_CONFIG["host"],
-            port=DB_CONFIG["port"],
-            dbname=DB_CONFIG["dbname"],
-            user=DB_CONFIG["user"],
-            password=DB_CONFIG["password"],
-            sslmode="require",  # важно для Render
-            cursor_factory=RealDictCursor
-        )
+        # Используем DATABASE_URL из переменных окружения, если он есть
+        if DB_URL:
+            conn = psycopg2.connect(DB_URL, cursor_factory=RealDictCursor)
+        else:
+            # Иначе используем конфигурацию из DB_CONFIG
+            conn = psycopg2.connect(
+                host=DB_CONFIG["host"],
+                port=DB_CONFIG["port"],
+                dbname=DB_CONFIG["dbname"],
+                user=DB_CONFIG["user"],
+                password=DB_CONFIG["password"],
+                sslmode="require",
+                cursor_factory=RealDictCursor
+            )
         return conn
     except Exception as e:
         print("Ошибка подключения к базе:", e)
