@@ -18,14 +18,7 @@
     <label>Название:
       <input type="text" name="nazvanie" value="{{ request.args.get('nazvanie', '')|e }}">
     </label>
-    <label>Доступ:
-      <select name="dostup">
-        <option value="">Все</option>
-        <option value="true" {% if request.args.get('dostup')=='true' %}selected{% endif %}>Да</option>
-        <option value="false" {% if request.args.get('dostup')=='false' %}selected{% endif %}>Нет</option>
-      </select>
-    </label>
-    <button type="submit">Фильтровать</button>
+    <button type="submit">Поиск</button>
   </form>
   
   <hr>
