@@ -132,21 +132,19 @@ surveys = {
     ],
 }
 
-def clear_database(conn, cur):
-    print("🧹 Очищаю старые данные...")
-    cur.execute("TRUNCATE TABLE otvet_polzovatelya RESTART IDENTITY CASCADE;")
-    cur.execute("TRUNCATE TABLE sessiya RESTART IDENTITY CASCADE;")
-    cur.execute("TRUNCATE TABLE variant_otveta RESTART IDENTITY CASCADE;")
-    cur.execute("TRUNCATE TABLE vopros RESTART IDENTITY CASCADE;")
-    cur.execute("TRUNCATE TABLE opros RESTART IDENTITY CASCADE;")
+def clear_reference_data(conn, cur):
+    cur.execute("DELETE FROM variant_otveta;")
+    cur.execute("DELETE FROM vopros;")
+    cur.execute("DELETE FROM opros;")
     conn.commit()
-    print("База очищена ✅")
+    print("Справочники обновлены")
+
 
 def fill_db_from_dict(data):
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
     
-    clear_database(conn, cur)
+    clear_reference_data(conn, cur)
 
     print("🚀 Заполняю базу новыми опросами...")
     for topic, questions in data.items():
