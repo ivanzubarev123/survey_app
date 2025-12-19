@@ -50,17 +50,17 @@ def sanitize_string(s):
 @app.route("/")
 def index():
     nazvanie_filter = sanitize_string(request.args.get("nazvanie"))
-    dostup_filter = request.args.get("dostup")
     
-    query = "SELECT id_opros, nazvanie, opisanie FROM opros WHERE 1=1"
+    query = """
+        SELECT DISTINCT id_opros, nazvanie, opisanie 
+        FROM opros 
+        WHERE dostup = TRUE
+    """
     params = []
 
     if nazvanie_filter:
         query += " AND nazvanie ILIKE %s"
         params.append(f"%{nazvanie_filter}%")
-    if dostup_filter in ("true", "false"):
-        query += " AND dostup = %s"
-        params.append(dostup_filter == "true")
 
     surveys = fetch_data(query, params)
     if surveys is None:
@@ -133,20 +133,15 @@ def start(id_opros):
                         """,
                         (id_opros, pol, vozrast)
                     )
-                    
-                    # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-                    # Было: id_sessii = cur.fetchone()[0]
-                    # Стало: обращаемся по ключу 'id_sessii'
+                
                     result = cur.fetchone()
                     id_sessii = result['id_sessii'] 
-                    # -------------------------
 
                 conn.commit()
 
             return redirect(url_for("opros", id_opros=id_opros, id_sessii=id_sessii))
 
         except Exception as e:
-            # Для лучшей отладки печатайте тип ошибки тоже
             print(f"ERROR: {type(e).__name__}: {e}", file=sys.stderr)
             return "<h1>Ошибка создания сессии.</h1>", 500
 
