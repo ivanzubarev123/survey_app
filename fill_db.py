@@ -136,9 +136,9 @@ def clear_database(conn, cur):
     print("🧹 Очищаю старые данные...")
     cur.execute("TRUNCATE TABLE otvet_polzovatelya RESTART IDENTITY CASCADE;")
     cur.execute("TRUNCATE TABLE sessiya RESTART IDENTITY CASCADE;")
-    #cur.execute("TRUNCATE TABLE variant_otveta RESTART IDENTITY CASCADE;")
-    #cur.execute("TRUNCATE TABLE vopros RESTART IDENTITY CASCADE;")
-    #cur.execute("TRUNCATE TABLE opros RESTART IDENTITY CASCADE;")
+    cur.execute("TRUNCATE TABLE variant_otveta RESTART IDENTITY CASCADE;")
+    cur.execute("TRUNCATE TABLE vopros RESTART IDENTITY CASCADE;")
+    cur.execute("TRUNCATE TABLE opros RESTART IDENTITY CASCADE;")
     conn.commit()
     print("База очищена ✅")
 
